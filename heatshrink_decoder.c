@@ -295,8 +295,13 @@ static uint16_t get_bits(heatshrink_decoder *hsd, uint8_t count) {
 
     /* If we aren't able to get COUNT bits, suspend immediately, because we
      * don't track how many bits of COUNT we've accumulated before suspend. */
-    if (hsd->input_size == 0) {
-        if (hsd->bit_index < (1 << (count - 1))) { return NO_BITS; }
+    if (hsd->input_size == 0 && hsd->bit_index < (1 << (count - 1))) {
+    	return NO_BITS;
+    } else if ( hsd->input_size - hsd->input_index == 1 && count > 8) {
+    	uint8_t required_bitmask = 1 << (count - 8 - 1);
+    	if (hsd->bit_index < required_bitmask) {
+    		return NO_BITS;
+    	}
     }
 
     for (i = 0; i < count; i++) {
